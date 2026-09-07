@@ -3,706 +3,521 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Aplikasi Kas Utama & Pekerjaan</title>
+    <title>Aplikasi Kas Bendahara Proyek</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- FontAwesome CDN -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- Firebase SDK (Compat Version for browser) -->
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-database-compat.js"></script>
+
     <style>
-        :root {
-            --primary: #1e3a8a;
-            --bg: #f1f5f9;
-            --card-bg: #ffffff;
-            --border: #cbd5e1;
-            --text: #0f172a;
-        }
-
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-            font-family: 'Segoe UI', Arial, sans-serif;
-        }
-
         body {
-            background-color: var(--bg);
-            color: var(--text);
-            padding: 20px;
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            background-color: #f8fafc;
         }
-
-        .dashboard-container {
-            max-width: 1200px;
-            margin: 0 auto;
-            border: 3px solid var(--text);
-            background: var(--card-bg);
-            padding: 20px;
-            border-radius: 8px;
-        }
-
-        .main-layout {
-            display: grid;
-            grid-template-columns: 1.8fr 1fr;
-            gap: 25px;
-        }
-
-        .left-col, .right-col {
-            display: flex;
-            flex-direction: column;
-            gap: 15px;
-        }
-
-        .balance-action-grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 12px;
-        }
-
-        .box-card {
-            border: 2px solid var(--text);
-            padding: 12px 15px;
-            border-radius: 6px;
-            background: #fff;
-        }
-
-        .box-title {
-            font-size: 0.85rem;
-            font-weight: 700;
-            color: #475569;
-            text-transform: uppercase;
-        }
-
-        .btn {
-            border: 2px solid var(--text);
-            background: #fff;
-            padding: 10px;
-            font-weight: 700;
-            font-size: 0.85rem;
-            cursor: pointer;
-            border-radius: 6px;
-            text-transform: uppercase;
-            transition: all 0.2s ease;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-
-        .btn:hover { background: #e2e8f0; }
-        .btn-green { background: #dcfce7; color: #14532d; }
-        .btn-green:hover { background: #bbf7d0; }
-        .btn-red { background: #ffe4e6; color: #881337; }
-        .btn-red:hover { background: #fecdd3; }
-        .btn-blue { background: #dbeafe; color: #1e40af; }
-        .btn-blue:hover { background: #bfdbfe; }
-        .btn-purple { background: #f3e8ff; color: #6b21a8; }
-        .btn-purple:hover { background: #e9d5ff; }
-        .btn-full { width: 100%; }
-
-        .table-box {
-            border: 2px solid var(--text);
-            border-radius: 6px;
-            padding: 15px;
-            min-height: 350px;
-            background: #fff;
-        }
-
-        .table-box h3 {
-            font-size: 1rem;
-            font-weight: 800;
-            margin-bottom: 12px;
-            border-bottom: 2px solid var(--text);
-            padding-bottom: 6px;
-        }
-
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            font-size: 0.85rem;
-        }
-
-        th, td {
-            border: 1px solid var(--border);
-            padding: 8px 10px;
-            text-align: left;
-        }
-
-        th { background: #f8fafc; font-weight: 700; }
-        .text-right { text-align: right; }
-        .text-center { text-align: center; }
-
-        .action-cell {
-            display: flex;
-            gap: 4px;
-            justify-content: center;
-        }
-
-        .pekerjaan-header {
-            display: flex;
-            gap: 10px;
-            align-items: center;
-        }
-
-        .pekerjaan-header .title-box {
-            flex: 1;
-            border: 2px solid var(--text);
-            padding: 10px 15px;
-            font-weight: 800;
-            text-align: center;
-            border-radius: 6px;
-            background: #f8fafc;
-        }
-
-        .btn-add {
-            border: 2px solid var(--text);
-            width: 45px;
-            height: 45px;
-            font-size: 1.5rem;
-            font-weight: 800;
-            background: #fff;
-            cursor: pointer;
-            border-radius: 6px;
-        }
-
-        .pekerjaan-list {
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
-        }
-
-        .pekerjaan-item {
-            display: flex;
-            gap: 8px;
-            align-items: center;
-        }
-
-        .pekerjaan-name {
-            flex: 1;
-            border: 2px solid var(--text);
-            padding: 10px 12px;
-            font-weight: 700;
-            border-radius: 6px;
-            background: #fff;
-            font-size: 0.85rem;
-        }
-
-        .btn-sm { padding: 4px 8px; font-size: 0.75rem; }
-
-        .empty-notice {
-            font-size: 0.85rem;
-            color: #64748b;
-            font-style: italic;
-            text-align: center;
-            padding: 15px;
-            border: 1px dashed var(--border);
-            border-radius: 6px;
-        }
-
-        .modal-overlay {
-            position: fixed;
-            top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0,0,0,0.5);
-            display: none;
-            justify-content: center;
-            align-items: center;
-            z-index: 1000;
-        }
-
-        .modal-content {
-            background: #fff;
-            border: 2px solid var(--text);
-            padding: 20px;
-            border-radius: 8px;
-            width: 100%;
-            max-width: 450px;
-        }
-
-        .modal-header {
-            font-weight: 800;
-            font-size: 1.1rem;
-            margin-bottom: 15px;
-            border-bottom: 2px solid var(--bg);
-            padding-bottom: 8px;
-        }
-
-        .form-group { margin-bottom: 12px; }
-        .form-group label { display: block; font-size: 0.8rem; font-weight: 700; margin-bottom: 4px; }
-        .form-group input, .form-group select {
-            width: 100%;
-            padding: 8px 10px;
-            border: 1px solid var(--border);
-            border-radius: 4px;
-        }
-
-        .modal-actions { display: flex; justify-content: flex-end; gap: 10px; margin-top: 15px; }
-
         @media print {
-            body * { visibility: hidden; }
-            #printableArea, #printableArea * { visibility: visible; }
-            #printableArea { position: absolute; left: 0; top: 0; width: 100%; }
             .no-print { display: none !important; }
+            .print-only { display: block !important; }
+            body { background: white; color: black; }
+            .shadow-card { box-shadow: none !important; border: 1px solid #e2e8f0; }
         }
     </style>
 </head>
-<body>
+<body class="text-slate-800 antialiased min-h-screen flex flex-col">
 
-<div class="dashboard-container no-print">
-    <div class="main-layout">
+    <!-- Header Navigation -->
+    <header class="bg-slate-900 text-white shadow-lg sticky top-0 z-40 no-print">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+            <div class="flex items-center space-x-3">
+                <div class="bg-blue-600 p-2 rounded-lg text-white">
+                    <i class="fa-solid fa-wallet text-xl"></i>
+                </div>
+                <div>
+                    <h1 class="font-bold text-lg leading-tight">BUKU KAS BENDAHARA</h1>
+                    <p class="text-xs text-slate-400">Sistem Pencatatan Kas Proyek Realtime</p>
+                </div>
+            </div>
+            
+            <!-- Connection Status Badge -->
+            <div class="flex items-center space-x-3">
+                <div id="statusBadge" class="flex items-center px-3 py-1 rounded-full text-xs font-medium bg-amber-500/20 text-amber-300 border border-amber-500/30">
+                    <span class="w-2 h-2 rounded-full bg-amber-400 mr-2 animate-pulse"></span>
+                    <span>Menghubungkan...</span>
+                </div>
+                <button onclick="window.print()" class="hidden md:flex items-center bg-slate-800 hover:bg-slate-700 text-xs text-slate-200 px-3 py-1.5 rounded-lg border border-slate-700 transition">
+                    <i class="fa-solid fa-print mr-1.5"></i> Cetak Laporan
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Container -->
+    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 flex-1 w-full">
         
-        <!-- BAGIAN KAS UTAMA -->
-        <div class="left-col">
-            <div class="balance-action-grid">
-                <div class="box-card"><div class="box-title">SALDO KAS</div></div>
-                <button class="btn btn-green" onclick="openModal('modalTambah')">TAMBAH KAS</button>
+        <!-- Printable Header (Only Visible When Printing) -->
+        <div class="hidden print-only mb-6 text-center border-b pb-4">
+            <h1 class="text-2xl font-bold uppercase tracking-wide">LAPORAN BUKU KAS BENDAHARA</h1>
+            <p class="text-sm text-slate-600">Dicetak pada: <span id="printDate"></span></p>
+        </div>
+
+        <!-- Metric Summary Cards -->
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+            <!-- Saldo Akhir -->
+            <div class="bg-gradient-to-br from-blue-900 to-slate-900 text-white p-5 rounded-2xl shadow-sm relative overflow-hidden border border-slate-800">
+                <div class="relative z-10">
+                    <p class="text-xs font-medium text-blue-200 uppercase tracking-wider mb-1">Total Saldo Kas</p>
+                    <h2 class="text-2xl sm:text-3xl font-extrabold" id="cardSaldo">Rp 0</h2>
+                    <p class="text-xs text-slate-400 mt-2 flex items-center">
+                        <i class="fa-solid fa-scale-balanced mr-1.5 text-blue-400"></i> Saldo Kas Bersih
+                    </p>
+                </div>
+                <i class="fa-solid fa-coins absolute -right-3 -bottom-3 text-7xl text-white/5"></i>
             </div>
 
-            <div class="balance-action-grid">
-                <div class="box-card"><div class="box-title">RP. <span id="saldoKas">0</span></div></div>
-                <button class="btn btn-red" onclick="openModal('modalBayar')">BAYAR / PENGELUARAN</button>
+            <!-- Total Pemasukan -->
+            <div class="bg-white p-5 rounded-2xl shadow-sm border border-slate-200/80 relative overflow-hidden shadow-card">
+                <div class="flex justify-between items-start">
+                    <div>
+                        <p class="text-xs font-semibold text-emerald-600 uppercase tracking-wider mb-1">Total Pemasukan</p>
+                        <h2 class="text-2xl font-bold text-slate-900" id="cardPemasukan">Rp 0</h2>
+                        <p class="text-xs text-slate-500 mt-2" id="countPemasukan">0 Transaksi</p>
+                    </div>
+                    <div class="p-3 bg-emerald-50 text-emerald-600 rounded-xl">
+                        <i class="fa-solid fa-arrow-down-left text-xl"></i>
+                    </div>
+                </div>
             </div>
 
-            <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px;">
-                <button class="btn" onclick="cetakKasUtama()">CETAK KAS</button>
-                <button class="btn btn-blue" onclick="exportBackupData()">BACKUP DATA</button>
-                <button class="btn btn-purple" onclick="document.getElementById('importFileInput').click()">RESTORE DATA</button>
-                <input type="file" id="importFileInput" accept=".json" onchange="handleImportBackup(event)" style="display:none;">
-            </div>
-
-            <div class="table-box">
-                <h3>DAFTAR DEBET/KREDIT</h3>
-                <table>
-                    <thead>
-                        <tr>
-                            <th>Tgl</th>
-                            <th>Keterangan</th>
-                            <th class="text-right">Debet</th>
-                            <th class="text-right">Kredit</th>
-                            <th class="text-center" style="width:120px;">Aksi</th>
-                        </tr>
-                    </thead>
-                    <tbody id="tableKasUtama"></tbody>
-                </table>
+            <!-- Total Pengeluaran -->
+            <div class="bg-white p-5 rounded-2xl shadow-sm border border-slate-200/80 relative overflow-hidden shadow-card">
+                <div class="flex justify-between items-start">
+                    <div>
+                        <p class="text-xs font-semibold text-rose-600 uppercase tracking-wider mb-1">Total Pengeluaran</p>
+                        <h2 class="text-2xl font-bold text-slate-900" id="cardPengeluaran">Rp 0</h2>
+                        <p class="text-xs text-slate-500 mt-2" id="countPengeluaran">0 Transaksi</p>
+                    </div>
+                    <div class="p-3 bg-rose-50 text-rose-600 rounded-xl">
+                        <i class="fa-solid fa-arrow-up-right text-xl"></i>
+                    </div>
+                </div>
             </div>
         </div>
 
-        <!-- BAGIAN DAFTAR PEKERJAAN -->
-        <div class="right-col">
-            <div class="pekerjaan-header">
-                <div class="title-box">DAFTAR PEKERJAAN</div>
-                <button class="btn-add" onclick="openModal('modalPekerjaan')" title="Tambah Pekerjaan">+</button>
+        <!-- Grid Layout: Form Input & Data Table -->
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+            
+            <!-- Left Column: Form Input (No Print) -->
+            <div class="lg:col-span-4 no-print">
+                <div class="bg-white rounded-2xl border border-slate-200/80 p-5 shadow-sm sticky top-20">
+                    <div class="flex items-center justify-between mb-4 border-b pb-3">
+                        <h3 class="font-bold text-slate-800 text-base flex items-center" id="formTitle">
+                            <i class="fa-solid fa-plus-circle text-blue-600 mr-2"></i> Tambah Transaksi
+                        </h3>
+                        <button id="cancelEditBtn" onclick="resetForm()" class="hidden text-xs text-rose-600 hover:underline">
+                            Batal Edit
+                        </button>
+                    </div>
+
+                    <form id="kasForm" onsubmit="handleFormSubmit(event)" class="space-y-4">
+                        <input type="hidden" id="editKey" value="">
+
+                        <!-- Tanggal -->
+                        <div>
+                            <label class="block text-xs font-medium text-slate-600 mb-1">Tanggal Transaksi</label>
+                            <input type="date" id="inputTanggal" required 
+                                   class="w-full px-3 py-2 text-sm border border-slate-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition">
+                        </div>
+
+                        <!-- Jenis Transaksi -->
+                        <div>
+                            <label class="block text-xs font-medium text-slate-600 mb-1">Jenis Kas</label>
+                            <div class="grid grid-cols-2 gap-2">
+                                <label class="flex items-center justify-center p-2.5 border rounded-xl cursor-pointer transition text-xs font-medium hover:bg-emerald-50 has-[:checked]:border-emerald-600 has-[:checked]:bg-emerald-50 has-[:checked]:text-emerald-700">
+                                    <input type="radio" name="jenis" value="pemasukan" checked class="hidden" onchange="updateCategoryOptions()">
+                                    <i class="fa-solid fa-arrow-down mr-1.5 text-emerald-600"></i> Pemasukan
+                                </label>
+                                <label class="flex items-center justify-center p-2.5 border rounded-xl cursor-pointer transition text-xs font-medium hover:bg-rose-50 has-[:checked]:border-rose-600 has-[:checked]:bg-rose-50 has-[:checked]:text-rose-700">
+                                    <input type="radio" name="jenis" value="pengeluaran" class="hidden" onchange="updateCategoryOptions()">
+                                    <i class="fa-solid fa-arrow-up mr-1.5 text-rose-600"></i> Pengeluaran
+                                </label>
+                            </div>
+                        </div>
+
+                        <!-- Kategori -->
+                        <div>
+                            <label class="block text-xs font-medium text-slate-600 mb-1">Kategori</label>
+                            <select id="inputKategori" required class="w-full px-3 py-2 text-sm border border-slate-300 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none bg-white">
+                                <!-- Options dynamically set -->
+                            </select>
+                        </div>
+
+                        <!-- Keterangan -->
+                        <div>
+                            <label class="block text-xs font-medium text-slate-600 mb-1">Uraian / Keterangan</label>
+                            <textarea id="inputKeterangan" rows="2" required placeholder="Contoh: Pembelian Semen 50 Sak"
+                                      class="w-full px-3 py-2 text-sm border border-slate-300 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none transition"></textarea>
+                        </div>
+
+                        <!-- Nominal -->
+                        <div>
+                            <label class="block text-xs font-medium text-slate-600 mb-1">Jumlah Nominal (Rp)</label>
+                            <div class="relative">
+                                <span class="absolute left-3 top-2.5 text-xs font-bold text-slate-400">Rp</span>
+                                <input type="number" id="inputNominal" min="1" required placeholder="0"
+                                       class="w-full pl-9 pr-3 py-2 text-sm font-semibold border border-slate-300 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none">
+                            </div>
+                        </div>
+
+                        <!-- No Bukti / Nota -->
+                        <div>
+                            <label class="block text-xs font-medium text-slate-600 mb-1">No. Bukti / Kuitansi <span class="text-slate-400 font-normal">(Opsional)</span></label>
+                            <input type="text" id="inputBukti" placeholder="BKT-001"
+                                   class="w-full px-3 py-2 text-sm border border-slate-300 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none">
+                        </div>
+
+                        <!-- Submit Button -->
+                        <button type="submit" id="submitBtn" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2.5 rounded-xl shadow-md transition duration-200 text-sm flex items-center justify-center">
+                            <i class="fa-solid fa-save mr-2"></i> Simpan Transaksi
+                        </button>
+                    </form>
+                </div>
             </div>
-            <div class="pekerjaan-list" id="pekerjaanListContainer"></div>
+
+            <!-- Right Column: Table & Filters -->
+            <div class="lg:col-span-8">
+                <div class="bg-white rounded-2xl border border-slate-200/80 p-5 shadow-sm shadow-card">
+                    
+                    <!-- Controls Bar -->
+                    <div class="flex flex-col sm:flex-row justify-between items-center gap-3 mb-4 no-print">
+                        
+                        <!-- Search Box -->
+                        <div class="relative w-full sm:w-64">
+                            <i class="fa-solid fa-search absolute left-3 top-3 text-slate-400 text-xs"></i>
+                            <input type="text" id="searchInput" oninput="renderTable()" placeholder="Cari uraian atau nota..."
+                                   class="w-full pl-8 pr-3 py-2 text-xs border border-slate-300 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none">
+                        </div>
+
+                        <!-- Filters -->
+                        <div class="flex items-center space-x-2 w-full sm:w-auto justify-end">
+                            <select id="filterJenis" onchange="renderTable()" class="px-3 py-2 text-xs border border-slate-300 rounded-xl bg-white outline-none">
+                                <option value="semua">Semua Jenis</option>
+                                <option value="pemasukan">Pemasukan</option>
+                                <option value="pengeluaran">Pengeluaran</option>
+                            </select>
+
+                            <button onclick="exportCSV()" title="Download Excel/CSV" class="p-2 border border-slate-300 hover:bg-slate-100 rounded-xl text-slate-600 text-xs flex items-center px-3">
+                                <i class="fa-solid fa-file-excel text-emerald-600 mr-1.5"></i> Export
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Transactions Table -->
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left text-xs">
+                            <thead class="bg-slate-100/80 text-slate-700 uppercase font-semibold border-b border-slate-200">
+                                <tr>
+                                    <th class="py-3 px-3">Tanggal</th>
+                                    <th class="py-3 px-3">Nota</th>
+                                    <th class="py-3 px-3">Kategori</th>
+                                    <th class="py-3 px-3">Uraian / Keterangan</th>
+                                    <th class="py-3 px-3 text-right">Nominal</th>
+                                    <th class="py-3 px-3 text-center no-print">Aksi</th>
+                                </tr>
+                            </thead>
+                            <tbody id="transactionBody" class="divide-y divide-slate-100">
+                                <!-- Dynamic Rows -->
+                            </tbody>
+                        </table>
+
+                        <!-- Empty State -->
+                        <div id="emptyState" class="hidden py-12 text-center text-slate-400">
+                            <i class="fa-solid fa-folder-open text-4xl mb-2 text-slate-300"></i>
+                            <p class="text-sm">Belum ada transaksi kas yang dicatat.</p>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+
         </div>
+    </main>
 
-    </div>
-</div>
+    <!-- Footer -->
+    <footer class="mt-auto bg-slate-100 border-t border-slate-200 py-4 no-print">
+        <div class="max-w-7xl mx-auto px-4 text-center text-xs text-slate-500">
+            &copy; <span id="year"></span> Buku Kas Bendahara Proyek &bull; Cloud Realtime Database Sync
+        </div>
+    </footer>
 
-<!-- FORM MODAL 1: TAMBAH KAS -->
-<div class="modal-overlay" id="modalTambah">
-    <div class="modal-content">
-        <div class="modal-header">FORM TAMBAH KAS</div>
-        <form onsubmit="handleTambahKas(event)">
-            <div class="form-group"><label>1. SUMBER</label><input type="text" id="tambahSumber" placeholder="Misal: Investor / Modal Awal" required></div>
-            <div class="form-group"><label>2. TANGGAL</label><input type="date" id="tambahTanggal" required></div>
-            <div class="form-group"><label>3. KETERANGAN</label><input type="text" id="tambahKeterangan" placeholder="Misal: Transfer Bank / Setoran Tunai"></div>
-            <div class="form-group"><label>4. NOMINAL (Rp)</label><input type="number" id="tambahNominal" min="1" required></div>
-            <div class="modal-actions">
-                <button type="button" class="btn btn-sm" onclick="closeModal('modalTambah')">Batal</button>
-                <button type="submit" class="btn btn-green btn-sm">Simpan</button>
-            </div>
-        </form>
-    </div>
-</div>
+    <!-- JavaScript Logic -->
+    <script>
+        // Set dynamic print date and year
+        document.getElementById('year').textContent = new Date().getFullYear();
+        document.getElementById('printDate').textContent = new Date().toLocaleDateString('id-ID', {
+            weekday: 'long', year: 'numeric', month: 'long', day: 'numeric'
+        });
+        document.getElementById('inputTanggal').valueAsDate = new Date();
 
-<!-- FORM MODAL 2: BAYAR / PENGELUARAN -->
-<div class="modal-overlay" id="modalBayar">
-    <div class="modal-content">
-        <div class="modal-header">FORM BAYAR / PENGELUARAN</div>
-        <form onsubmit="handleBayar(event)">
-            <div class="form-group"><label>1. PENERIMA</label><input type="text" id="bayarPenerima" placeholder="Misal: Toko Bangunan Jaya" required></div>
-            <div class="form-group"><label>2. TANGGAL</label><input type="date" id="bayarTanggal" required></div>
-            <div class="form-group"><label>3. KETERANGAN</label><input type="text" id="bayarKeterangan" placeholder="Misal: Pembelian Semen & Cat"></div>
-            <div class="form-group"><label>4. NOMINAL (Rp)</label><input type="number" id="bayarNominal" min="1" required></div>
-            <div class="form-group"><label>5. PEKERJAAN</label><select id="bayarPekerjaan" required></select></div>
-            <div class="modal-actions">
-                <button type="button" class="btn btn-sm" onclick="closeModal('modalBayar')">Batal</button>
-                <button type="submit" class="btn btn-red btn-sm">Simpan</button>
-            </div>
-        </form>
-    </div>
-</div>
-
-<!-- FORM MODAL 3: TAMBAH PEKERJAAN BARU -->
-<div class="modal-overlay" id="modalPekerjaan">
-    <div class="modal-content">
-        <div class="modal-header">TAMBAH PEKERJAAN BARU</div>
-        <form onsubmit="handleTambahPekerjaan(event)">
-            <div class="form-group"><label>NAMA PEKERJAAN / PAKET</label><input type="text" id="namaPekerjaanBaru" placeholder="Misal: PROYEK RUMAH A" required></div>
-            <div class="modal-actions">
-                <button type="button" class="btn btn-sm" onclick="closeModal('modalPekerjaan')">Batal</button>
-                <button type="submit" class="btn btn-green btn-sm">Tambah</button>
-            </div>
-        </form>
-    </div>
-</div>
-
-<!-- FORM MODAL 4: EDIT TAMBAH KAS -->
-<div class="modal-overlay" id="modalEditTambah">
-    <div class="modal-content">
-        <div class="modal-header">EDIT TAMBAH KAS</div>
-        <form onsubmit="handleSimpanEditTambah(event)">
-            <input type="hidden" id="editTambahId">
-            <div class="form-group"><label>1. SUMBER / KETERANGAN</label><input type="text" id="editTambahSumber" required></div>
-            <div class="form-group"><label>2. TANGGAL</label><input type="date" id="editTambahTanggal" required></div>
-            <div class="form-group"><label>3. NOMINAL (Rp)</label><input type="number" id="editTambahNominal" min="1" required></div>
-            <div class="modal-actions">
-                <button type="button" class="btn btn-sm" onclick="closeModal('modalEditTambah')">Batal</button>
-                <button type="submit" class="btn btn-blue btn-sm">Simpan Perubahan</button>
-            </div>
-        </form>
-    </div>
-</div>
-
-<!-- FORM MODAL 5: EDIT BAYAR / PENGELUARAN -->
-<div class="modal-overlay" id="modalEditBayar">
-    <div class="modal-content">
-        <div class="modal-header">EDIT BAYAR / PENGELUARAN</div>
-        <form onsubmit="handleSimpanEditBayar(event)">
-            <input type="hidden" id="editBayarId">
-            <div class="form-group"><label>1. PENERIMA / KETERANGAN</label><input type="text" id="editBayarPenerima" required></div>
-            <div class="form-group"><label>2. TANGGAL</label><input type="date" id="editBayarTanggal" required></div>
-            <div class="form-group"><label>3. NOMINAL (Rp)</label><input type="number" id="editBayarNominal" min="1" required></div>
-            <div class="form-group"><label>4. PEKERJAAN</label><select id="editBayarPekerjaan"></select></div>
-            <div class="modal-actions">
-                <button type="button" class="btn btn-sm" onclick="closeModal('modalEditBayar')">Batal</button>
-                <button type="submit" class="btn btn-blue btn-sm">Simpan Perubahan</button>
-            </div>
-        </form>
-    </div>
-</div>
-
-<!-- AREA CETAK -->
-<div id="printableArea" style="display:none; padding: 20px;"></div>
-
-<script>
-    let saldo = 0;
-    let daftarPekerjaan = [];
-    let transaksiKasUtama = [];
-    let transaksiPekerjaan = {};
-
-    document.addEventListener("DOMContentLoaded", () => {
-        loadDataFromStorage();
-        document.getElementById('tambahTanggal').valueAsDate = new Date();
-        document.getElementById('bayarTanggal').valueAsDate = new Date();
-        syncAndRender();
-    });
-
-    function saveDataToStorage() {
-        const payload = {
-            saldo,
-            daftarPekerjaan,
-            transaksiKasUtama,
-            transaksiPekerjaan
+        // -------------------------------------------------------------
+        // FIREBASE CONFIGURATION & INITIALIZATION
+        // -------------------------------------------------------------
+        const firebaseConfig = {
+            apiKey: "AIzaSyCx9OaSoFvC7sc-MAibLMLvy9UMUqwWwUE",
+            authDomain: "kas-proyek.firebaseapp.com",
+            databaseURL: "https://kas-proyek-default-rtdb.asia-southeast1.firebasedatabase.app",
+            projectId: "kas-proyek",
+            storageBucket: "kas-proyek.firebasestorage.app",
+            messagingSenderId: "365959572576",
+            appId: "1:365959572576:web:01460c7731aeddecdfe705",
+            measurementId: "G-918595WEWY"
         };
-        localStorage.setItem('APP_KAS_DATA', JSON.stringify(payload));
-    }
 
-    function loadDataFromStorage() {
-        const saved = localStorage.getItem('APP_KAS_DATA');
-        if(saved) {
-            try {
-                const parsed = JSON.parse(saved);
-                daftarPekerjaan = parsed.daftarPekerjaan || [];
-                
-                transaksiKasUtama = (parsed.transaksiKasUtama || []).map((t, idx) => {
-                    const debet = parseFloat(t.debet || 0);
-                    const kredit = parseFloat(t.kredit || 0);
-                    const tipe = t.tipe || (debet > 0 ? 'TAMBAH' : 'BAYAR');
-                    const nominal = parseFloat(t.nominal || (tipe === 'TAMBAH' ? debet : kredit) || 0);
+        // Initialize Firebase
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.database();
+        const kasRef = db.ref('transaksi_kas');
 
-                    return {
-                        id: String(t.id || ('TX-' + Date.now() + '-' + idx)),
-                        tipe,
-                        sumber: t.sumber || (tipe === 'TAMBAH' ? t.keterangan : ''),
-                        penerima: t.penerima || (tipe === 'BAYAR' ? t.keterangan : ''),
-                        tanggal: t.tanggal || new Date().toISOString().slice(0, 10),
-                        keteranganDetail: t.keteranganDetail || t.keterangan || '',
-                        nominal,
-                        pekerjaan: t.pekerjaan || ''
-                    };
-                });
-            } catch(e) {
-                console.error("Gagal load data storage", e);
+        let rawTransactions = {}; // Stores database snapshot
+
+        // Category options
+        const categories = {
+            pemasukan: ['Termin Proyek', 'Dana Taktis / Kas Utama', 'Pengembalian Dana', 'Lain-lain'],
+            pengeluaran: ['Bahan & Material', 'Upah Pekerja / Tukang', 'Sewa Alat & Kendaraan', 'Konsumsi & Operasional', 'BBM & Transport', 'Lain-lain']
+        };
+
+        function updateCategoryOptions() {
+            const jenis = document.querySelector('input[name="jenis"]:checked').value;
+            const select = document.getElementById('inputKategori');
+            select.innerHTML = categories[jenis].map(cat => `<option value="${cat}">${cat}</option>`).join('');
+        }
+        updateCategoryOptions();
+
+        // -------------------------------------------------------------
+        // REALTIME DATABASE LISTENER
+        // -------------------------------------------------------------
+        const statusBadge = document.getElementById('statusBadge');
+
+        // Connection status monitoring
+        db.ref('.info/connected').on('value', (snap) => {
+            if (snap.val() === true) {
+                statusBadge.className = 'flex items-center px-3 py-1 rounded-full text-xs font-medium bg-emerald-500/20 text-emerald-300 border border-emerald-500/30';
+                statusBadge.innerHTML = '<span class="w-2 h-2 rounded-full bg-emerald-400 mr-2 animate-pulse"></span><span>Terhubung ke Cloud (Realtime)</span>';
+            } else {
+                statusBadge.className = 'flex items-center px-3 py-1 rounded-full text-xs font-medium bg-rose-500/20 text-rose-300 border border-rose-500/30';
+                statusBadge.innerHTML = '<span class="w-2 h-2 rounded-full bg-rose-400 mr-2"></span><span>Terputus / Offline</span>';
+            }
+        });
+
+        // Listen for realtime data updates
+        kasRef.on('value', (snapshot) => {
+            rawTransactions = snapshot.val() || {};
+            renderTable();
+            calculateSummary();
+        });
+
+        // -------------------------------------------------------------
+        // CRUD OPERATIONS
+        // -------------------------------------------------------------
+        function handleFormSubmit(e) {
+            e.preventDefault();
+
+            const key = document.getElementById('editKey').value;
+            const data = {
+                tanggal: document.getElementById('inputTanggal').value,
+                jenis: document.querySelector('input[name="jenis"]:checked').value,
+                kategori: document.getElementById('inputKategori').value,
+                keterangan: document.getElementById('inputKeterangan').value.trim(),
+                nominal: parseFloat(document.getElementById('inputNominal').value) || 0,
+                bukti: document.getElementById('inputBukti').value.trim(),
+                updatedAt: firebase.database.ServerValue.TIMESTAMP
+            };
+
+            if (key) {
+                // Update existing
+                kasRef.child(key).update(data)
+                    .then(() => resetForm())
+                    .catch(err => alert("Gagal mengupdate: " + err.message));
+            } else {
+                // Push new item
+                data.createdAt = firebase.database.ServerValue.TIMESTAMP;
+                kasRef.push(data)
+                    .then(() => resetForm())
+                    .catch(err => alert("Gagal menyimpan: " + err.message));
             }
         }
-    }
 
-    function syncAndRender() {
-        saldo = 0;
-        transaksiPekerjaan = {};
-        daftarPekerjaan.forEach(p => { transaksiPekerjaan[p] = []; });
+        function editTransaction(key) {
+            const item = rawTransactions[key];
+            if (!item) return;
 
-        transaksiKasUtama.forEach(t => {
-            if(t.tipe === 'TAMBAH') {
-                saldo += parseFloat(t.nominal || 0);
-                t.displayKeterangan = t.keteranganDetail || t.sumber || 'Tambah Kas';
-            } else if(t.tipe === 'BAYAR') {
-                saldo -= parseFloat(t.nominal || 0);
-                t.displayKeterangan = t.keteranganDetail || t.penerima || 'Pengeluaran';
-
-                if(t.pekerjaan && transaksiPekerjaan[t.pekerjaan]) {
-                    transaksiPekerjaan[t.pekerjaan].push({
-                        id: t.id,
-                        tanggal: t.tanggal,
-                        penerima: t.penerima || '-',
-                        keterangan: t.keteranganDetail || '-',
-                        nominal: t.nominal
-                    });
-                }
+            document.getElementById('editKey').value = key;
+            document.getElementById('inputTanggal').value = item.tanggal;
+            
+            const radio = document.querySelector(`input[name="jenis"][value="${item.jenis}"]`);
+            if (radio) {
+                radio.checked = true;
+                updateCategoryOptions();
             }
-        });
 
-        renderAll();
-        saveDataToStorage();
-    }
+            document.getElementById('inputKategori').value = item.kategori;
+            document.getElementById('inputKeterangan').value = item.keterangan;
+            document.getElementById('inputNominal').value = item.nominal;
+            document.getElementById('inputBukti').value = item.bukti || '';
 
-    function renderAll() {
-        document.getElementById('saldoKas').innerText = saldo.toLocaleString('id-ID');
-        const tbodyKas = document.getElementById('tableKasUtama');
-        tbodyKas.innerHTML = '';
-        
-        transaksiKasUtama.forEach((t) => {
-            tbodyKas.innerHTML += `
-                <tr>
-                    <td>${t.tanggal}</td>
-                    <td>${t.displayKeterangan}</td>
-                    <td class="text-right">${t.tipe === 'TAMBAH' ? 'Rp ' + t.nominal.toLocaleString('id-ID') : '-'}</td>
-                    <td class="text-right">${t.tipe === 'BAYAR' ? 'Rp ' + t.nominal.toLocaleString('id-ID') : '-'}</td>
-                    <td class="text-center">
-                        <div class="action-cell">
-                            <button class="btn btn-blue btn-sm" onclick="bukaModalEdit('${t.id}')">EDIT</button>
-                            <button class="btn btn-red btn-sm" onclick="hapusTransaksi('${t.id}')">HAPUS</button>
+            document.getElementById('formTitle').innerHTML = '<i class="fa-solid fa-pen-to-square text-amber-500 mr-2"></i> Edit Transaksi';
+            document.getElementById('submitBtn').className = 'w-full bg-amber-600 hover:bg-amber-700 text-white font-semibold py-2.5 rounded-xl shadow-md transition duration-200 text-sm flex items-center justify-center';
+            document.getElementById('submitBtn').innerHTML = '<i class="fa-solid fa-check mr-2"></i> Update Transaksi';
+            document.getElementById('cancelEditBtn').classList.remove('hidden');
+        }
+
+        function deleteTransaction(key) {
+            if (confirm("Apakah Anda yakin ingin menghapus transaksi ini?")) {
+                kasRef.child(key).remove();
+            }
+        }
+
+        function resetForm() {
+            document.getElementById('kasForm').reset();
+            document.getElementById('editKey').value = '';
+            document.getElementById('inputTanggal').valueAsDate = new Date();
+            updateCategoryOptions();
+
+            document.getElementById('formTitle').innerHTML = '<i class="fa-solid fa-plus-circle text-blue-600 mr-2"></i> Tambah Transaksi';
+            document.getElementById('submitBtn').className = 'w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2.5 rounded-xl shadow-md transition duration-200 text-sm flex items-center justify-center';
+            document.getElementById('submitBtn').innerHTML = '<i class="fa-solid fa-save mr-2"></i> Simpan Transaksi';
+            document.getElementById('cancelEditBtn').classList.add('hidden');
+        }
+
+        // -------------------------------------------------------------
+        // RENDER & SUMMARY CALCULATIONS
+        // -------------------------------------------------------------
+        function formatRupiah(number) {
+            return new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', maximumFractionDigits: 0 }).format(number);
+        }
+
+        function calculateSummary() {
+            let totalMasuk = 0;
+            let totalKeluar = 0;
+            let countMasuk = 0;
+            let countKeluar = 0;
+
+            Object.values(rawTransactions).forEach(item => {
+                const val = parseFloat(item.nominal) || 0;
+                if (item.jenis === 'pemasukan') {
+                    totalMasuk += val;
+                    countMasuk++;
+                } else if (item.jenis === 'pengeluaran') {
+                    totalKeluar += val;
+                    countKeluar++;
+                }
+            });
+
+            const saldo = totalMasuk - totalKeluar;
+
+            document.getElementById('cardSaldo').textContent = formatRupiah(saldo);
+            document.getElementById('cardPemasukan').textContent = formatRupiah(totalMasuk);
+            document.getElementById('cardPengeluaran').textContent = formatRupiah(totalKeluar);
+            document.getElementById('countPemasukan').textContent = `${countMasuk} Transaksi`;
+            document.getElementById('countPengeluaran').textContent = `${countKeluar} Transaksi`;
+        }
+
+        function renderTable() {
+            const tbody = document.getElementById('transactionBody');
+            const emptyState = document.getElementById('emptyState');
+            const search = document.getElementById('searchInput').value.toLowerCase();
+            const filterJenis = document.getElementById('filterJenis').value;
+
+            tbody.innerHTML = '';
+
+            // Convert object to array sorted by date descending
+            const items = Object.keys(rawTransactions).map(key => ({
+                key,
+                ...rawTransactions[key]
+            })).sort((a, b) => new Date(b.tanggal) - new Date(a.tanggal));
+
+            const filtered = items.filter(item => {
+                const matchJenis = filterJenis === 'semua' || item.jenis === filterJenis;
+                const matchSearch = item.keterangan.toLowerCase().includes(search) || 
+                                    (item.bukti && item.bukti.toLowerCase().includes(search)) ||
+                                    item.kategori.toLowerCase().includes(search);
+                return matchJenis && matchSearch;
+            });
+
+            if (filtered.length === 0) {
+                emptyState.classList.remove('hidden');
+                return;
+            }
+
+            emptyState.classList.add('hidden');
+
+            filtered.forEach(item => {
+                const tr = document.createElement('tr');
+                tr.className = 'hover:bg-slate-50 transition border-b border-slate-100';
+
+                const isMasuk = item.jenis === 'pemasukan';
+                const jenisBadge = isMasuk 
+                    ? '<span class="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-semibold bg-emerald-100 text-emerald-800"><i class="fa-solid fa-arrow-down mr-1"></i> Masuk</span>'
+                    : '<span class="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-semibold bg-rose-100 text-rose-800"><i class="fa-solid fa-arrow-up mr-1"></i> Keluar</span>';
+
+                const nominalClass = isMasuk ? 'text-emerald-600 font-bold' : 'text-slate-800 font-bold';
+                const sign = isMasuk ? '+' : '-';
+
+                tr.innerHTML = `
+                    <td class="py-3 px-3 whitespace-nowrap text-slate-600 font-medium">${item.tanggal}</td>
+                    <td class="py-3 px-3 whitespace-nowrap text-slate-500 font-mono text-[11px]">${item.bukti || '-'}</td>
+                    <td class="py-3 px-3 whitespace-nowrap">
+                        <span class="text-slate-700 font-medium">${item.kategori}</span>
+                        <div class="mt-0.5">${jenisBadge}</div>
+                    </td>
+                    <td class="py-3 px-3 text-slate-800 font-medium leading-relaxed max-w-xs break-words">${item.keterangan}</td>
+                    <td class="py-3 px-3 whitespace-nowrap text-right ${nominalClass}">
+                        ${sign} ${formatRupiah(item.nominal)}
+                    </td>
+                    <td class="py-3 px-3 whitespace-nowrap text-center no-print">
+                        <div class="flex items-center justify-center space-x-1">
+                            <button onclick="editTransaction('${item.key}')" class="p-1.5 text-slate-500 hover:text-amber-600 hover:bg-amber-50 rounded-lg transition" title="Edit">
+                                <i class="fa-solid fa-pen-to-square text-xs"></i>
+                            </button>
+                            <button onclick="deleteTransaction('${item.key}')" class="p-1.5 text-slate-500 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition" title="Hapus">
+                                <i class="fa-solid fa-trash-can text-xs"></i>
+                            </button>
                         </div>
                     </td>
-                </tr>
-            `;
-        });
-
-        const pekContainer = document.getElementById('pekerjaanListContainer');
-        pekContainer.innerHTML = '';
-        if (daftarPekerjaan.length === 0) {
-            pekContainer.innerHTML = '<div class="empty-notice">Belum ada pekerjaan. Klik tombol + untuk menambahkan.</div>';
-        } else {
-            daftarPekerjaan.forEach((nama, index) => {
-                pekContainer.innerHTML += `
-                    <div class="pekerjaan-item">
-                        <div class="pekerjaan-name">${nama}</div>
-                        <button class="btn btn-sm" onclick="cetakPekerjaan('${nama}')">LIHAT/CETAK</button>
-                        <button class="btn btn-red btn-sm" onclick="hapusPekerjaan(${index})">HAPUS</button>
-                    </div>
                 `;
+                tbody.appendChild(tr);
             });
         }
 
-        updateSelectPekerjaan('bayarPekerjaan');
-        updateSelectPekerjaan('editBayarPekerjaan');
-    }
-
-    function updateSelectPekerjaan(selectId) {
-        const selectPek = document.getElementById(selectId);
-        if(!selectPek) return;
-        const currentVal = selectPek.value;
-        selectPek.innerHTML = '<option value="">-- Pilih Pekerjaan --</option>';
-        daftarPekerjaan.forEach(nama => {
-            selectPek.innerHTML += `<option value="${nama}">${nama}</option>`;
-        });
-        if(currentVal) selectPek.value = currentVal;
-    }
-
-    function openModal(id) { document.getElementById(id).style.display = 'flex'; }
-    function closeModal(id) { document.getElementById(id).style.display = 'none'; }
-
-    function handleTambahKas(e) {
-        e.preventDefault();
-        const sumber = document.getElementById('tambahSumber').value;
-        const tanggal = document.getElementById('tambahTanggal').value;
-        const keterangan = document.getElementById('tambahKeterangan').value;
-        const nominal = parseFloat(document.getElementById('tambahNominal').value);
-
-        const labelFull = `Tambah Kas [${sumber}${keterangan ? ' - ' + keterangan : ''}]`;
-
-        transaksiKasUtama.push({
-            id: 'TX-' + Date.now(),
-            tipe: 'TAMBAH',
-            sumber,
-            tanggal,
-            keteranganDetail: labelFull,
-            nominal
-        });
-        
-        closeModal('modalTambah');
-        e.target.reset();
-        document.getElementById('tambahTanggal').valueAsDate = new Date();
-        syncAndRender();
-    }
-
-    function handleBayar(e) {
-        e.preventDefault();
-        const penerima = document.getElementById('bayarPenerima').value;
-        const tanggal = document.getElementById('bayarTanggal').value;
-        const keterangan = document.getElementById('bayarKeterangan').value;
-        const nominal = parseFloat(document.getElementById('bayarNominal').value);
-        const pekerjaan = document.getElementById('bayarPekerjaan').value;
-
-        const labelFull = `Bayar ke ${penerima}${keterangan ? ' (' + keterangan + ')' : ''} [${pekerjaan}]`;
-
-        transaksiKasUtama.push({
-            id: 'TX-' + Date.now(),
-            tipe: 'BAYAR',
-            penerima,
-            tanggal,
-            keteranganDetail: labelFull,
-            nominal,
-            pekerjaan
-        });
-
-        closeModal('modalBayar');
-        e.target.reset();
-        document.getElementById('bayarTanggal').valueAsDate = new Date();
-        syncAndRender();
-    }
-
-    function handleTambahPekerjaan(e) {
-        e.preventDefault();
-        const nama = document.getElementById('namaPekerjaanBaru').value.trim().toUpperCase();
-        if(nama && !daftarPekerjaan.includes(nama)) {
-            daftarPekerjaan.push(nama);
-            syncAndRender();
-        }
-        closeModal('modalPekerjaan');
-        e.target.reset();
-    }
-
-    function bukaModalEdit(id) {
-        const idStr = String(id);
-        const tx = transaksiKasUtama.find(t => String(t.id) === idStr);
-        if(!tx) return;
-
-        if(tx.tipe === 'TAMBAH') {
-            document.getElementById('editTambahId').value = tx.id;
-            document.getElementById('editTambahSumber').value = tx.keteranganDetail || tx.sumber || '';
-            document.getElementById('editTambahTanggal').value = tx.tanggal;
-            document.getElementById('editTambahNominal').value = tx.nominal;
-            openModal('modalEditTambah');
-        } else {
-            document.getElementById('editBayarId').value = tx.id;
-            document.getElementById('editBayarPenerima').value = tx.keteranganDetail || tx.penerima || '';
-            document.getElementById('editBayarTanggal').value = tx.tanggal;
-            document.getElementById('editBayarNominal').value = tx.nominal;
-            document.getElementById('editBayarPekerjaan').value = tx.pekerjaan || '';
-            openModal('modalEditBayar');
-        }
-    }
-
-    function handleSimpanEditTambah(e) {
-        e.preventDefault();
-        const idStr = String(document.getElementById('editTambahId').value);
-        const tx = transaksiKasUtama.find(t => String(t.id) === idStr);
-        if(tx) {
-            tx.keteranganDetail = document.getElementById('editTambahSumber').value;
-            tx.tanggal = document.getElementById('editTambahTanggal').value;
-            tx.nominal = parseFloat(document.getElementById('editTambahNominal').value);
-        }
-        closeModal('modalEditTambah');
-        syncAndRender();
-    }
-
-    function handleSimpanEditBayar(e) {
-        e.preventDefault();
-        const idStr = String(document.getElementById('editBayarId').value);
-        const tx = transaksiKasUtama.find(t => String(t.id) === idStr);
-        if(tx) {
-            tx.keteranganDetail = document.getElementById('editBayarPenerima').value;
-            tx.tanggal = document.getElementById('editBayarTanggal').value;
-            tx.nominal = parseFloat(document.getElementById('editBayarNominal').value);
-            tx.pekerjaan = document.getElementById('editBayarPekerjaan').value;
-        }
-        closeModal('modalEditBayar');
-        syncAndRender();
-    }
-
-    function hapusTransaksi(id) {
-        if(!confirm("Yakin ingin menghapus transaksi ini?")) return;
-        const idStr = String(id);
-        transaksiKasUtama = transaksiKasUtama.filter(t => String(t.id) !== idStr);
-        syncAndRender();
-    }
-
-    function hapusPekerjaan(index) {
-        const nama = daftarPekerjaan[index];
-        if(!confirm(`Yakin hapus pekerjaan "${nama}"?`)) return;
-
-        daftarPekerjaan.splice(index, 1);
-        syncAndRender();
-    }
-
-    function exportBackupData() {
-        const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(localStorage.getItem('APP_KAS_DATA'));
-        const downloadAnchor = document.createElement('a');
-        downloadAnchor.setAttribute("href", dataStr);
-        downloadAnchor.setAttribute("download", `backup_kas_${new Date().toISOString().slice(0,10)}.json`);
-        document.body.appendChild(downloadAnchor);
-        downloadAnchor.click();
-        downloadAnchor.remove();
-    }
-
-    function handleImportBackup(e) {
-        const file = e.target.files[0];
-        if(!file) return;
-
-        const reader = new FileReader();
-        reader.onload = function(evt) {
-            try {
-                const parsed = JSON.parse(evt.target.result);
-                localStorage.setItem('APP_KAS_DATA', JSON.stringify(parsed));
-                loadDataFromStorage();
-                syncAndRender();
-                alert("Data berhasil dipulihkan!");
-            } catch(err) {
-                alert("File backup tidak valid!");
+        // -------------------------------------------------------------
+        // EXPORT TO CSV
+        // -------------------------------------------------------------
+        function exportCSV() {
+            const items = Object.values(rawTransactions);
+            if (items.length === 0) {
+                alert("Tidak ada data untuk diexport!");
+                return;
             }
-        };
-        reader.readAsText(file);
-    }
 
-    function cetakKasUtama() {
-        const printArea = document.getElementById('printableArea');
-        printArea.style.display = 'block';
-        let html = `2LAPORAN KAS UTAMA</h2><p><strong>Saldo Akhir: Rp ${saldo.toLocaleString('id-ID')}</strong></p><br><table border="1" cellpadding="8" cellspacing="0" style="width:100%;"><thead><tr><th>Tanggal</th><th>Keterangan</th><th>Debet</th><th>Kredit</th></tr></thead><tbody>`;
-        transaksiKasUtama.forEach(t => { 
-            html += `<tr><td>${t.tanggal}</td><td>${t.displayKeterangan}</td><td>${t.tipe === 'TAMBAH' ? 'Rp ' + t.nominal.toLocaleString('id-ID') : '-'}</td><td>${t.tipe === 'BAYAR' ? 'Rp ' + t.nominal.toLocaleString('id-ID') : '-'}</td></tr>`; 
-        });
-        html += `</tbody></table>`;
-        printArea.innerHTML = html;
-        window.print();
-        printArea.style.display = 'none';
-    }
+            let csv = "Tanggal,Nota,Jenis,Kategori,Keterangan,Nominal (Rp)
+";
+            items.forEach(item => {
+                const ket = `"${(item.keterangan || '').replace(/"/g, '""')}"`;
+                csv += `${item.tanggal},${item.bukti || ''},${item.jenis},${item.kategori},${ket},${item.nominal}
+`;
+            });
 
-    function cetakPekerjaan(namaPekerjaan) {
-        const printArea = document.getElementById('printableArea');
-        printArea.style.display = 'block';
-        const list = transaksiPekerjaan[namaPekerjaan] || [];
-        let total = 0;
-        let html = `<h2>LAPORAN PEKERJAAN: ${namaPekerjaan}</h2><br><table border="1" cellpadding="8" cellspacing="0" style="width:100%;"><thead><tr><th>No</th><th>Tanggal</th><th>Penerima / Keterangan</th><th>Nominal</th></tr></thead><tbody>`;
-        list.forEach((t, i) => { total += t.nominal; html += `<tr><td>${i + 1}</td><td>${t.tanggal}</td><td>${t.keterangan}</td><td>Rp ${t.nominal.toLocaleString('id-ID')}</td></tr>`; });
-        html += `
-                </tbody>
-                <tfoot>
-                    <tr>
-                        <th colspan="3">TOTAL PENGELUARAN</th>
-                        <th>Rp ${total.toLocaleString('id-ID')}</th>
-                    </tr>
-                </tfoot>
-            </table>
-        `;
-        printArea.innerHTML = html;
-        window.print();
-        printArea.style.display = 'none';
-    }
-</script>
+            const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `Laporan_Kas_Proyek_${new Date().toISOString().slice(0,10)}.csv`;
+            a.click();
+        }
+    </script>
 </body>
 </html>
