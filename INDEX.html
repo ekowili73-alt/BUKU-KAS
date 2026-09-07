@@ -1,0 +1,708 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Aplikasi Kas Utama & Pekerjaan</title>
+    <style>
+        :root {
+            --primary: #1e3a8a;
+            --bg: #f1f5f9;
+            --card-bg: #ffffff;
+            --border: #cbd5e1;
+            --text: #0f172a;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Arial, sans-serif;
+        }
+
+        body {
+            background-color: var(--bg);
+            color: var(--text);
+            padding: 20px;
+        }
+
+        .dashboard-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            border: 3px solid var(--text);
+            background: var(--card-bg);
+            padding: 20px;
+            border-radius: 8px;
+        }
+
+        .main-layout {
+            display: grid;
+            grid-template-columns: 1.8fr 1fr;
+            gap: 25px;
+        }
+
+        .left-col, .right-col {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .balance-action-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+        }
+
+        .box-card {
+            border: 2px solid var(--text);
+            padding: 12px 15px;
+            border-radius: 6px;
+            background: #fff;
+        }
+
+        .box-title {
+            font-size: 0.85rem;
+            font-weight: 700;
+            color: #475569;
+            text-transform: uppercase;
+        }
+
+        .btn {
+            border: 2px solid var(--text);
+            background: #fff;
+            padding: 10px;
+            font-weight: 700;
+            font-size: 0.85rem;
+            cursor: pointer;
+            border-radius: 6px;
+            text-transform: uppercase;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .btn:hover { background: #e2e8f0; }
+        .btn-green { background: #dcfce7; color: #14532d; }
+        .btn-green:hover { background: #bbf7d0; }
+        .btn-red { background: #ffe4e6; color: #881337; }
+        .btn-red:hover { background: #fecdd3; }
+        .btn-blue { background: #dbeafe; color: #1e40af; }
+        .btn-blue:hover { background: #bfdbfe; }
+        .btn-purple { background: #f3e8ff; color: #6b21a8; }
+        .btn-purple:hover { background: #e9d5ff; }
+        .btn-full { width: 100%; }
+
+        .table-box {
+            border: 2px solid var(--text);
+            border-radius: 6px;
+            padding: 15px;
+            min-height: 350px;
+            background: #fff;
+        }
+
+        .table-box h3 {
+            font-size: 1rem;
+            font-weight: 800;
+            margin-bottom: 12px;
+            border-bottom: 2px solid var(--text);
+            padding-bottom: 6px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.85rem;
+        }
+
+        th, td {
+            border: 1px solid var(--border);
+            padding: 8px 10px;
+            text-align: left;
+        }
+
+        th { background: #f8fafc; font-weight: 700; }
+        .text-right { text-align: right; }
+        .text-center { text-align: center; }
+
+        .action-cell {
+            display: flex;
+            gap: 4px;
+            justify-content: center;
+        }
+
+        .pekerjaan-header {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+
+        .pekerjaan-header .title-box {
+            flex: 1;
+            border: 2px solid var(--text);
+            padding: 10px 15px;
+            font-weight: 800;
+            text-align: center;
+            border-radius: 6px;
+            background: #f8fafc;
+        }
+
+        .btn-add {
+            border: 2px solid var(--text);
+            width: 45px;
+            height: 45px;
+            font-size: 1.5rem;
+            font-weight: 800;
+            background: #fff;
+            cursor: pointer;
+            border-radius: 6px;
+        }
+
+        .pekerjaan-list {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .pekerjaan-item {
+            display: flex;
+            gap: 8px;
+            align-items: center;
+        }
+
+        .pekerjaan-name {
+            flex: 1;
+            border: 2px solid var(--text);
+            padding: 10px 12px;
+            font-weight: 700;
+            border-radius: 6px;
+            background: #fff;
+            font-size: 0.85rem;
+        }
+
+        .btn-sm { padding: 4px 8px; font-size: 0.75rem; }
+
+        .empty-notice {
+            font-size: 0.85rem;
+            color: #64748b;
+            font-style: italic;
+            text-align: center;
+            padding: 15px;
+            border: 1px dashed var(--border);
+            border-radius: 6px;
+        }
+
+        .modal-overlay {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.5);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+
+        .modal-content {
+            background: #fff;
+            border: 2px solid var(--text);
+            padding: 20px;
+            border-radius: 8px;
+            width: 100%;
+            max-width: 450px;
+        }
+
+        .modal-header {
+            font-weight: 800;
+            font-size: 1.1rem;
+            margin-bottom: 15px;
+            border-bottom: 2px solid var(--bg);
+            padding-bottom: 8px;
+        }
+
+        .form-group { margin-bottom: 12px; }
+        .form-group label { display: block; font-size: 0.8rem; font-weight: 700; margin-bottom: 4px; }
+        .form-group input, .form-group select {
+            width: 100%;
+            padding: 8px 10px;
+            border: 1px solid var(--border);
+            border-radius: 4px;
+        }
+
+        .modal-actions { display: flex; justify-content: flex-end; gap: 10px; margin-top: 15px; }
+
+        @media print {
+            body * { visibility: hidden; }
+            #printableArea, #printableArea * { visibility: visible; }
+            #printableArea { position: absolute; left: 0; top: 0; width: 100%; }
+            .no-print { display: none !important; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="dashboard-container no-print">
+    <div class="main-layout">
+        
+        <!-- BAGIAN KAS UTAMA -->
+        <div class="left-col">
+            <div class="balance-action-grid">
+                <div class="box-card"><div class="box-title">SALDO KAS</div></div>
+                <button class="btn btn-green" onclick="openModal('modalTambah')">TAMBAH KAS</button>
+            </div>
+
+            <div class="balance-action-grid">
+                <div class="box-card"><div class="box-title">RP. <span id="saldoKas">0</span></div></div>
+                <button class="btn btn-red" onclick="openModal('modalBayar')">BAYAR / PENGELUARAN</button>
+            </div>
+
+            <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px;">
+                <button class="btn" onclick="cetakKasUtama()">CETAK KAS</button>
+                <button class="btn btn-blue" onclick="exportBackupData()">BACKUP DATA</button>
+                <button class="btn btn-purple" onclick="document.getElementById('importFileInput').click()">RESTORE DATA</button>
+                <input type="file" id="importFileInput" accept=".json" onchange="handleImportBackup(event)" style="display:none;">
+            </div>
+
+            <div class="table-box">
+                <h3>DAFTAR DEBET/KREDIT</h3>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Tgl</th>
+                            <th>Keterangan</th>
+                            <th class="text-right">Debet</th>
+                            <th class="text-right">Kredit</th>
+                            <th class="text-center" style="width:120px;">Aksi</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tableKasUtama"></tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- BAGIAN DAFTAR PEKERJAAN -->
+        <div class="right-col">
+            <div class="pekerjaan-header">
+                <div class="title-box">DAFTAR PEKERJAAN</div>
+                <button class="btn-add" onclick="openModal('modalPekerjaan')" title="Tambah Pekerjaan">+</button>
+            </div>
+            <div class="pekerjaan-list" id="pekerjaanListContainer"></div>
+        </div>
+
+    </div>
+</div>
+
+<!-- FORM MODAL 1: TAMBAH KAS -->
+<div class="modal-overlay" id="modalTambah">
+    <div class="modal-content">
+        <div class="modal-header">FORM TAMBAH KAS</div>
+        <form onsubmit="handleTambahKas(event)">
+            <div class="form-group"><label>1. SUMBER</label><input type="text" id="tambahSumber" placeholder="Misal: Investor / Modal Awal" required></div>
+            <div class="form-group"><label>2. TANGGAL</label><input type="date" id="tambahTanggal" required></div>
+            <div class="form-group"><label>3. KETERANGAN</label><input type="text" id="tambahKeterangan" placeholder="Misal: Transfer Bank / Setoran Tunai"></div>
+            <div class="form-group"><label>4. NOMINAL (Rp)</label><input type="number" id="tambahNominal" min="1" required></div>
+            <div class="modal-actions">
+                <button type="button" class="btn btn-sm" onclick="closeModal('modalTambah')">Batal</button>
+                <button type="submit" class="btn btn-green btn-sm">Simpan</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- FORM MODAL 2: BAYAR / PENGELUARAN -->
+<div class="modal-overlay" id="modalBayar">
+    <div class="modal-content">
+        <div class="modal-header">FORM BAYAR / PENGELUARAN</div>
+        <form onsubmit="handleBayar(event)">
+            <div class="form-group"><label>1. PENERIMA</label><input type="text" id="bayarPenerima" placeholder="Misal: Toko Bangunan Jaya" required></div>
+            <div class="form-group"><label>2. TANGGAL</label><input type="date" id="bayarTanggal" required></div>
+            <div class="form-group"><label>3. KETERANGAN</label><input type="text" id="bayarKeterangan" placeholder="Misal: Pembelian Semen & Cat"></div>
+            <div class="form-group"><label>4. NOMINAL (Rp)</label><input type="number" id="bayarNominal" min="1" required></div>
+            <div class="form-group"><label>5. PEKERJAAN</label><select id="bayarPekerjaan" required></select></div>
+            <div class="modal-actions">
+                <button type="button" class="btn btn-sm" onclick="closeModal('modalBayar')">Batal</button>
+                <button type="submit" class="btn btn-red btn-sm">Simpan</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- FORM MODAL 3: TAMBAH PEKERJAAN BARU -->
+<div class="modal-overlay" id="modalPekerjaan">
+    <div class="modal-content">
+        <div class="modal-header">TAMBAH PEKERJAAN BARU</div>
+        <form onsubmit="handleTambahPekerjaan(event)">
+            <div class="form-group"><label>NAMA PEKERJAAN / PAKET</label><input type="text" id="namaPekerjaanBaru" placeholder="Misal: PROYEK RUMAH A" required></div>
+            <div class="modal-actions">
+                <button type="button" class="btn btn-sm" onclick="closeModal('modalPekerjaan')">Batal</button>
+                <button type="submit" class="btn btn-green btn-sm">Tambah</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- FORM MODAL 4: EDIT TAMBAH KAS -->
+<div class="modal-overlay" id="modalEditTambah">
+    <div class="modal-content">
+        <div class="modal-header">EDIT TAMBAH KAS</div>
+        <form onsubmit="handleSimpanEditTambah(event)">
+            <input type="hidden" id="editTambahId">
+            <div class="form-group"><label>1. SUMBER / KETERANGAN</label><input type="text" id="editTambahSumber" required></div>
+            <div class="form-group"><label>2. TANGGAL</label><input type="date" id="editTambahTanggal" required></div>
+            <div class="form-group"><label>3. NOMINAL (Rp)</label><input type="number" id="editTambahNominal" min="1" required></div>
+            <div class="modal-actions">
+                <button type="button" class="btn btn-sm" onclick="closeModal('modalEditTambah')">Batal</button>
+                <button type="submit" class="btn btn-blue btn-sm">Simpan Perubahan</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- FORM MODAL 5: EDIT BAYAR / PENGELUARAN -->
+<div class="modal-overlay" id="modalEditBayar">
+    <div class="modal-content">
+        <div class="modal-header">EDIT BAYAR / PENGELUARAN</div>
+        <form onsubmit="handleSimpanEditBayar(event)">
+            <input type="hidden" id="editBayarId">
+            <div class="form-group"><label>1. PENERIMA / KETERANGAN</label><input type="text" id="editBayarPenerima" required></div>
+            <div class="form-group"><label>2. TANGGAL</label><input type="date" id="editBayarTanggal" required></div>
+            <div class="form-group"><label>3. NOMINAL (Rp)</label><input type="number" id="editBayarNominal" min="1" required></div>
+            <div class="form-group"><label>4. PEKERJAAN</label><select id="editBayarPekerjaan"></select></div>
+            <div class="modal-actions">
+                <button type="button" class="btn btn-sm" onclick="closeModal('modalEditBayar')">Batal</button>
+                <button type="submit" class="btn btn-blue btn-sm">Simpan Perubahan</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- AREA CETAK -->
+<div id="printableArea" style="display:none; padding: 20px;"></div>
+
+<script>
+    let saldo = 0;
+    let daftarPekerjaan = [];
+    let transaksiKasUtama = [];
+    let transaksiPekerjaan = {};
+
+    document.addEventListener("DOMContentLoaded", () => {
+        loadDataFromStorage();
+        document.getElementById('tambahTanggal').valueAsDate = new Date();
+        document.getElementById('bayarTanggal').valueAsDate = new Date();
+        syncAndRender();
+    });
+
+    function saveDataToStorage() {
+        const payload = {
+            saldo,
+            daftarPekerjaan,
+            transaksiKasUtama,
+            transaksiPekerjaan
+        };
+        localStorage.setItem('APP_KAS_DATA', JSON.stringify(payload));
+    }
+
+    function loadDataFromStorage() {
+        const saved = localStorage.getItem('APP_KAS_DATA');
+        if(saved) {
+            try {
+                const parsed = JSON.parse(saved);
+                daftarPekerjaan = parsed.daftarPekerjaan || [];
+                
+                transaksiKasUtama = (parsed.transaksiKasUtama || []).map((t, idx) => {
+                    const debet = parseFloat(t.debet || 0);
+                    const kredit = parseFloat(t.kredit || 0);
+                    const tipe = t.tipe || (debet > 0 ? 'TAMBAH' : 'BAYAR');
+                    const nominal = parseFloat(t.nominal || (tipe === 'TAMBAH' ? debet : kredit) || 0);
+
+                    return {
+                        id: String(t.id || ('TX-' + Date.now() + '-' + idx)),
+                        tipe,
+                        sumber: t.sumber || (tipe === 'TAMBAH' ? t.keterangan : ''),
+                        penerima: t.penerima || (tipe === 'BAYAR' ? t.keterangan : ''),
+                        tanggal: t.tanggal || new Date().toISOString().slice(0, 10),
+                        keteranganDetail: t.keteranganDetail || t.keterangan || '',
+                        nominal,
+                        pekerjaan: t.pekerjaan || ''
+                    };
+                });
+            } catch(e) {
+                console.error("Gagal load data storage", e);
+            }
+        }
+    }
+
+    function syncAndRender() {
+        saldo = 0;
+        transaksiPekerjaan = {};
+        daftarPekerjaan.forEach(p => { transaksiPekerjaan[p] = []; });
+
+        transaksiKasUtama.forEach(t => {
+            if(t.tipe === 'TAMBAH') {
+                saldo += parseFloat(t.nominal || 0);
+                t.displayKeterangan = t.keteranganDetail || t.sumber || 'Tambah Kas';
+            } else if(t.tipe === 'BAYAR') {
+                saldo -= parseFloat(t.nominal || 0);
+                t.displayKeterangan = t.keteranganDetail || t.penerima || 'Pengeluaran';
+
+                if(t.pekerjaan && transaksiPekerjaan[t.pekerjaan]) {
+                    transaksiPekerjaan[t.pekerjaan].push({
+                        id: t.id,
+                        tanggal: t.tanggal,
+                        penerima: t.penerima || '-',
+                        keterangan: t.keteranganDetail || '-',
+                        nominal: t.nominal
+                    });
+                }
+            }
+        });
+
+        renderAll();
+        saveDataToStorage();
+    }
+
+    function renderAll() {
+        document.getElementById('saldoKas').innerText = saldo.toLocaleString('id-ID');
+        const tbodyKas = document.getElementById('tableKasUtama');
+        tbodyKas.innerHTML = '';
+        
+        transaksiKasUtama.forEach((t) => {
+            tbodyKas.innerHTML += `
+                <tr>
+                    <td>${t.tanggal}</td>
+                    <td>${t.displayKeterangan}</td>
+                    <td class="text-right">${t.tipe === 'TAMBAH' ? 'Rp ' + t.nominal.toLocaleString('id-ID') : '-'}</td>
+                    <td class="text-right">${t.tipe === 'BAYAR' ? 'Rp ' + t.nominal.toLocaleString('id-ID') : '-'}</td>
+                    <td class="text-center">
+                        <div class="action-cell">
+                            <button class="btn btn-blue btn-sm" onclick="bukaModalEdit('${t.id}')">EDIT</button>
+                            <button class="btn btn-red btn-sm" onclick="hapusTransaksi('${t.id}')">HAPUS</button>
+                        </div>
+                    </td>
+                </tr>
+            `;
+        });
+
+        const pekContainer = document.getElementById('pekerjaanListContainer');
+        pekContainer.innerHTML = '';
+        if (daftarPekerjaan.length === 0) {
+            pekContainer.innerHTML = '<div class="empty-notice">Belum ada pekerjaan. Klik tombol + untuk menambahkan.</div>';
+        } else {
+            daftarPekerjaan.forEach((nama, index) => {
+                pekContainer.innerHTML += `
+                    <div class="pekerjaan-item">
+                        <div class="pekerjaan-name">${nama}</div>
+                        <button class="btn btn-sm" onclick="cetakPekerjaan('${nama}')">LIHAT/CETAK</button>
+                        <button class="btn btn-red btn-sm" onclick="hapusPekerjaan(${index})">HAPUS</button>
+                    </div>
+                `;
+            });
+        }
+
+        updateSelectPekerjaan('bayarPekerjaan');
+        updateSelectPekerjaan('editBayarPekerjaan');
+    }
+
+    function updateSelectPekerjaan(selectId) {
+        const selectPek = document.getElementById(selectId);
+        if(!selectPek) return;
+        const currentVal = selectPek.value;
+        selectPek.innerHTML = '<option value="">-- Pilih Pekerjaan --</option>';
+        daftarPekerjaan.forEach(nama => {
+            selectPek.innerHTML += `<option value="${nama}">${nama}</option>`;
+        });
+        if(currentVal) selectPek.value = currentVal;
+    }
+
+    function openModal(id) { document.getElementById(id).style.display = 'flex'; }
+    function closeModal(id) { document.getElementById(id).style.display = 'none'; }
+
+    function handleTambahKas(e) {
+        e.preventDefault();
+        const sumber = document.getElementById('tambahSumber').value;
+        const tanggal = document.getElementById('tambahTanggal').value;
+        const keterangan = document.getElementById('tambahKeterangan').value;
+        const nominal = parseFloat(document.getElementById('tambahNominal').value);
+
+        const labelFull = `Tambah Kas [${sumber}${keterangan ? ' - ' + keterangan : ''}]`;
+
+        transaksiKasUtama.push({
+            id: 'TX-' + Date.now(),
+            tipe: 'TAMBAH',
+            sumber,
+            tanggal,
+            keteranganDetail: labelFull,
+            nominal
+        });
+        
+        closeModal('modalTambah');
+        e.target.reset();
+        document.getElementById('tambahTanggal').valueAsDate = new Date();
+        syncAndRender();
+    }
+
+    function handleBayar(e) {
+        e.preventDefault();
+        const penerima = document.getElementById('bayarPenerima').value;
+        const tanggal = document.getElementById('bayarTanggal').value;
+        const keterangan = document.getElementById('bayarKeterangan').value;
+        const nominal = parseFloat(document.getElementById('bayarNominal').value);
+        const pekerjaan = document.getElementById('bayarPekerjaan').value;
+
+        const labelFull = `Bayar ke ${penerima}${keterangan ? ' (' + keterangan + ')' : ''} [${pekerjaan}]`;
+
+        transaksiKasUtama.push({
+            id: 'TX-' + Date.now(),
+            tipe: 'BAYAR',
+            penerima,
+            tanggal,
+            keteranganDetail: labelFull,
+            nominal,
+            pekerjaan
+        });
+
+        closeModal('modalBayar');
+        e.target.reset();
+        document.getElementById('bayarTanggal').valueAsDate = new Date();
+        syncAndRender();
+    }
+
+    function handleTambahPekerjaan(e) {
+        e.preventDefault();
+        const nama = document.getElementById('namaPekerjaanBaru').value.trim().toUpperCase();
+        if(nama && !daftarPekerjaan.includes(nama)) {
+            daftarPekerjaan.push(nama);
+            syncAndRender();
+        }
+        closeModal('modalPekerjaan');
+        e.target.reset();
+    }
+
+    function bukaModalEdit(id) {
+        const idStr = String(id);
+        const tx = transaksiKasUtama.find(t => String(t.id) === idStr);
+        if(!tx) return;
+
+        if(tx.tipe === 'TAMBAH') {
+            document.getElementById('editTambahId').value = tx.id;
+            document.getElementById('editTambahSumber').value = tx.keteranganDetail || tx.sumber || '';
+            document.getElementById('editTambahTanggal').value = tx.tanggal;
+            document.getElementById('editTambahNominal').value = tx.nominal;
+            openModal('modalEditTambah');
+        } else {
+            document.getElementById('editBayarId').value = tx.id;
+            document.getElementById('editBayarPenerima').value = tx.keteranganDetail || tx.penerima || '';
+            document.getElementById('editBayarTanggal').value = tx.tanggal;
+            document.getElementById('editBayarNominal').value = tx.nominal;
+            document.getElementById('editBayarPekerjaan').value = tx.pekerjaan || '';
+            openModal('modalEditBayar');
+        }
+    }
+
+    function handleSimpanEditTambah(e) {
+        e.preventDefault();
+        const idStr = String(document.getElementById('editTambahId').value);
+        const tx = transaksiKasUtama.find(t => String(t.id) === idStr);
+        if(tx) {
+            tx.keteranganDetail = document.getElementById('editTambahSumber').value;
+            tx.tanggal = document.getElementById('editTambahTanggal').value;
+            tx.nominal = parseFloat(document.getElementById('editTambahNominal').value);
+        }
+        closeModal('modalEditTambah');
+        syncAndRender();
+    }
+
+    function handleSimpanEditBayar(e) {
+        e.preventDefault();
+        const idStr = String(document.getElementById('editBayarId').value);
+        const tx = transaksiKasUtama.find(t => String(t.id) === idStr);
+        if(tx) {
+            tx.keteranganDetail = document.getElementById('editBayarPenerima').value;
+            tx.tanggal = document.getElementById('editBayarTanggal').value;
+            tx.nominal = parseFloat(document.getElementById('editBayarNominal').value);
+            tx.pekerjaan = document.getElementById('editBayarPekerjaan').value;
+        }
+        closeModal('modalEditBayar');
+        syncAndRender();
+    }
+
+    function hapusTransaksi(id) {
+        if(!confirm("Yakin ingin menghapus transaksi ini?")) return;
+        const idStr = String(id);
+        transaksiKasUtama = transaksiKasUtama.filter(t => String(t.id) !== idStr);
+        syncAndRender();
+    }
+
+    function hapusPekerjaan(index) {
+        const nama = daftarPekerjaan[index];
+        if(!confirm(`Yakin hapus pekerjaan "${nama}"?`)) return;
+
+        daftarPekerjaan.splice(index, 1);
+        syncAndRender();
+    }
+
+    function exportBackupData() {
+        const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(localStorage.getItem('APP_KAS_DATA'));
+        const downloadAnchor = document.createElement('a');
+        downloadAnchor.setAttribute("href", dataStr);
+        downloadAnchor.setAttribute("download", `backup_kas_${new Date().toISOString().slice(0,10)}.json`);
+        document.body.appendChild(downloadAnchor);
+        downloadAnchor.click();
+        downloadAnchor.remove();
+    }
+
+    function handleImportBackup(e) {
+        const file = e.target.files[0];
+        if(!file) return;
+
+        const reader = new FileReader();
+        reader.onload = function(evt) {
+            try {
+                const parsed = JSON.parse(evt.target.result);
+                localStorage.setItem('APP_KAS_DATA', JSON.stringify(parsed));
+                loadDataFromStorage();
+                syncAndRender();
+                alert("Data berhasil dipulihkan!");
+            } catch(err) {
+                alert("File backup tidak valid!");
+            }
+        };
+        reader.readAsText(file);
+    }
+
+    function cetakKasUtama() {
+        const printArea = document.getElementById('printableArea');
+        printArea.style.display = 'block';
+        let html = `2LAPORAN KAS UTAMA</h2><p><strong>Saldo Akhir: Rp ${saldo.toLocaleString('id-ID')}</strong></p><br><table border="1" cellpadding="8" cellspacing="0" style="width:100%;"><thead><tr><th>Tanggal</th><th>Keterangan</th><th>Debet</th><th>Kredit</th></tr></thead><tbody>`;
+        transaksiKasUtama.forEach(t => { 
+            html += `<tr><td>${t.tanggal}</td><td>${t.displayKeterangan}</td><td>${t.tipe === 'TAMBAH' ? 'Rp ' + t.nominal.toLocaleString('id-ID') : '-'}</td><td>${t.tipe === 'BAYAR' ? 'Rp ' + t.nominal.toLocaleString('id-ID') : '-'}</td></tr>`; 
+        });
+        html += `</tbody></table>`;
+        printArea.innerHTML = html;
+        window.print();
+        printArea.style.display = 'none';
+    }
+
+    function cetakPekerjaan(namaPekerjaan) {
+        const printArea = document.getElementById('printableArea');
+        printArea.style.display = 'block';
+        const list = transaksiPekerjaan[namaPekerjaan] || [];
+        let total = 0;
+        let html = `<h2>LAPORAN PEKERJAAN: ${namaPekerjaan}</h2><br><table border="1" cellpadding="8" cellspacing="0" style="width:100%;"><thead><tr><th>No</th><th>Tanggal</th><th>Penerima / Keterangan</th><th>Nominal</th></tr></thead><tbody>`;
+        list.forEach((t, i) => { total += t.nominal; html += `<tr><td>${i + 1}</td><td>${t.tanggal}</td><td>${t.keterangan}</td><td>Rp ${t.nominal.toLocaleString('id-ID')}</td></tr>`; });
+        html += `
+                </tbody>
+                <tfoot>
+                    <tr>
+                        <th colspan="3">TOTAL PENGELUARAN</th>
+                        <th>Rp ${total.toLocaleString('id-ID')}</th>
+                    </tr>
+                </tfoot>
+            </table>
+        `;
+        printArea.innerHTML = html;
+        window.print();
+        printArea.style.display = 'none';
+    }
+</script>
+</body>
+</html>
